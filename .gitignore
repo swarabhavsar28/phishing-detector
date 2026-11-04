@@ -1,0 +1,5 @@
+results/checkpoint-*/
+
+# Trained model and training checkpoints
+model/hf_model/
+results/checkpoint-*/

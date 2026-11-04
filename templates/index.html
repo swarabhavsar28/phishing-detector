@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Phishing Detector</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>🔐 AI Phishing Detector</h1>
+
+    <form method="POST">
+        <textarea name="email" placeholder="Paste suspicious email...">{{ email_text }}</textarea>
+        <button type="submit">Analyze</button>
+    </form>
+
+    {% if data %}
+    <div class="result">
+        <h2>{{ data.label }}</h2>
+        <p>Risk Score: {{ data.risk_score }} / 100</p>
+
+        <div class="bar">
+            <div class="fill" style="width: {{ data.risk_score }}%"></div>
+        </div>
+    </div>
+
+    {% if data.keywords %}
+    <div class="box">
+        <h3>⚠️ Suspicious Words</h3>
+        <p>{{ data.keywords }}</p>
+    </div>
+    {% endif %}
+
+    {% if data.urls %}
+    <div class="box">
+        <h3>🔗 URLs</h3>
+        <p>{{ data.urls }}</p>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+
+</body>
+</html>

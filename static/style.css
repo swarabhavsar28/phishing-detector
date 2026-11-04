@@ -1,0 +1,51 @@
+body {
+    background: #0f172a;
+    color: white;
+    font-family: Arial;
+    text-align: center;
+}
+
+.container {
+    margin-top: 80px;
+}
+
+textarea {
+    width: 500px;
+    height: 150px;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+}
+
+button {
+    margin-top: 15px;
+    padding: 10px 25px;
+    background: #22c55e;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+}
+
+.result {
+    margin-top: 20px;
+}
+
+.bar {
+    width: 300px;
+    height: 10px;
+    background: #1e293b;
+    margin: 10px auto;
+    border-radius: 5px;
+}
+
+.fill {
+    height: 10px;
+    background: #ef4444;
+    border-radius: 5px;
+}
+
+.box {
+    margin-top: 15px;
+    color: #f87171;
+}
