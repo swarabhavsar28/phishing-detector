@@ -1,5 +1,13 @@
-results/checkpoint-*/
-
-# Trained model and training checkpoints
+# Trained model weights and checkpoints
 model/hf_model/
 results/checkpoint-*/
+
+# Local application state and Python environments
+instance/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example

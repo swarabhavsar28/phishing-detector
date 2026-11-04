@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% set page_eyebrow = "EMAIL TEXT ANALYSIS" %}
+{% set page_description = "Analyze pasted message text using the same local model and visible pattern checks as before." %}
+{% block content %}
+<div class="message-layout">
+  <section class="panel message-panel">
+    <div class="scan-form-heading"><span class="large-icon"><svg><use href="#icon-mail"></use></svg></span><div><h2>Analyze a message</h2><p>Message contents are processed locally and are not added to scan history.</p></div></div>
+    {% if error %}<div class="inline-alert" role="alert"><span>!</span><div><strong>Could not analyze the message</strong><p>{{ error }}</p></div></div>{% endif %}
+    <form method="post" action="{{ url_for('message_analyzer') }}" class="message-form" data-loading-form>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="message-input">Email or message text</label>
+      <textarea id="message-input" name="message" maxlength="12000" placeholder="Paste the message text to review…" aria-describedby="message-help">{{ message }}</textarea>
+      <div class="textarea-meta"><span id="message-help">Up to 12,000 characters. Avoid pasting private or sensitive content.</span><span data-char-count>0 / 12,000</span></div>
+      <button class="button button-primary" type="submit"><span class="button-label">Analyze message</span><span class="button-loading" aria-hidden="true"><span class="spinner"></span> Analyzing locally…</span><svg class="button-arrow"><use href="#icon-arrow"></use></svg></button>
+    </form>
+    <div class="privacy-callout"><span class="privacy-lock">⌑</span><p><strong>Not stored</strong><br>Message text is only analyzed for this response. Use the URL scanner to create a persistent URL scan record.</p></div>
+  </section>
+  <aside class="panel message-note"><div class="eyebrow">SCOPE</div><h2>What stays local</h2><ul class="clean-list"><li>Text is passed to the model and keyword rules in this app process.</li><li>HTTP(S) links are extracted as strings; the app never opens them.</li><li>Only this result is rendered. The message body is not written to SQLite.</li></ul></aside>
+</div>
+{% if result %}
+<section class="result-section" aria-live="polite"><div class="result-section-heading"><div><div class="eyebrow">ANALYSIS COMPLETE · NOT SAVED</div><h2>Message result</h2></div></div>
+<article class="result-card result-{{ result.classification }}"><div class="result-main"><div class="result-status-icon"><svg><use href="{{ '#icon-shield' if result.classification == 'phishing' else '#icon-check' if result.classification == 'legitimate' else '#icon-scan' }}"></use></svg></div><div class="result-title-group"><span class="result-kicker">COMPOSITE ASSESSMENT</span><h3>{{ result.label }}</h3><p>Message body was not saved.</p></div><div class="risk-number"><strong>{{ '%.1f'|format(result.risk_score) }}</strong><span>/ 100</span></div></div><div class="risk-meter-track"><div class="risk-meter-fill" data-value="{{ result.risk_score }}"></div></div>
+<div class="result-metrics"><div><span>Classifier class 1 score</span><strong>{% if result.class1_score is not none %}{{ '%.1f'|format(result.class1_score) }}%{% else %}Unavailable{% endif %}</strong><small>Softmax output; not calibrated</small></div><div><span>Extracted links</span><strong>{{ result.urls|length }}</strong><small>HTTP(S) strings only</small></div><div><span>Analysis mode</span><strong>{{ 'Classifier + heuristics' if result.model_used else 'Heuristics only' }}</strong><small>No external lookups</small></div></div>
+<div class="result-details-grid"><div class="result-detail-block"><div class="detail-heading"><span class="detail-mark mark-cyan"><svg><use href="#icon-scan"></use></svg></span><div><strong>Observed indicators</strong><small>Configured rules, not a model explanation</small></div></div>{% if result.observations %}<ul class="indicator-list">{% for observation in result.observations %}<li><span class="indicator-bullet"></span>{{ observation }}</li>{% endfor %}</ul>{% else %}<p class="detail-empty">No configured indicators matched.</p>{% endif %}</div><div class="result-detail-block"><div class="detail-heading"><span class="detail-mark mark-green">↗</span><div><strong>Extracted URLs</strong><small>Not opened or verified</small></div></div>{% if result.urls %}<ul class="url-list">{% for url in result.urls %}<li><code>{{ url }}</code></li>{% endfor %}</ul>{% else %}<p class="detail-empty">No HTTP(S) links found.</p>{% endif %}</div></div>
+<div class="result-footnote"><span class="notice-icon">i</span><p>This score is a triage signal, not proof of malicious intent or a calibrated probability.</p></div></article></section>
+{% endif %}
+{% endblock %}

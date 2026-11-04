@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% set page_eyebrow = "SCAN RECORD · #" ~ scan.id %}
+{% set page_description = "Saved result details. Stored history omits URL query strings and fragments." %}
+{% block heading_action %}<a class="button button-secondary" href="{{ url_for('history') }}"><svg class="rotate-arrow"><use href="#icon-arrow"></use></svg> Back to history</a>{% endblock %}
+{% block content %}
+<article class="result-card result-{{ scan.classification }} detail-result-card">
+  <div class="result-main"><div class="result-status-icon"><svg><use href="{{ '#icon-shield' if scan.classification == 'phishing' else '#icon-check' if scan.classification == 'legitimate' else '#icon-scan' }}"></use></svg></div><div class="result-title-group"><span class="result-kicker">{{ scan.created_at|replace('T', ' ')|replace('+00:00', ' UTC') }}</span><h2>{{ scan.label }}</h2><p>{{ scan.url }}</p></div><div class="risk-number"><strong>{{ '%.1f'|format(scan.risk_score) }}</strong><span>/ 100</span></div></div>
+  <div class="risk-meter-track"><div class="risk-meter-fill" data-value="{{ scan.risk_score }}"></div></div>
+  <div class="detail-facts"><div><span>Hostname</span><strong>{{ scan.hostname }}</strong></div><div><span>Classifier class 1 score</span><strong>{% if scan.class1_score is not none %}{{ '%.1f'|format(scan.class1_score) }}%{% else %}Unavailable{% endif %}</strong></div><div><span>Model state</span><strong>{{ scan.model_state|replace('_', ' ')|title }}</strong></div><div><span>Analysis mode</span><strong>{{ 'Classifier + heuristics' if scan.model_used else 'Heuristics only' }}</strong></div></div>
+  <div class="result-detail-block detail-observations"><div class="detail-heading"><span class="detail-mark mark-cyan"><svg><use href="#icon-scan"></use></svg></span><div><strong>Observed indicators</strong><small>String-based checks; not a model explanation</small></div></div>{% if scan.observations %}<ul class="indicator-list">{% for observation in scan.observations %}<li><span class="indicator-bullet"></span>{{ observation }}</li>{% endfor %}</ul>{% else %}<p class="detail-empty">No configured keyword or URL pattern matched.</p>{% endif %}</div>
+  <div class="result-footnote"><span class="notice-icon">i</span><p>The class score is a softmax output and is not calibrated. This record does not establish the safety of the destination. Query strings and fragments are removed from saved history.</p></div>
+</article>
+{% endblock %}

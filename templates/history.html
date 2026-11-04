@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% set page_eyebrow = "LOCAL RECORDS" %}
+{% set page_description = "Search and review URL scans stored in the local SQLite history." %}
+{% block heading_action %}{% if scans %}<form method="post" action="{{ url_for('clear_history') }}" data-confirm="Clear every saved scan from this device? This cannot be undone." data-confirm-label="Clear history"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="button button-danger-quiet" type="submit"><svg><use href="#icon-close"></use></svg> Clear history</button></form>{% endif %}{% endblock %}
+{% block content %}
+<section class="panel history-panel">
+  <form class="filter-bar" method="get" action="{{ url_for('history') }}">
+    <label class="search-field"><svg><use href="#icon-scan"></use></svg><span class="visually-hidden">Search URL or hostname</span><input name="q" value="{{ search }}" placeholder="Search URL or hostname…"></label>
+    <label class="filter-select"><span class="visually-hidden">Filter by classification</span><select name="classification"><option value="">All classifications</option><option value="phishing" {{ 'selected' if classification == 'phishing' else '' }}>High risk</option><option value="review" {{ 'selected' if classification == 'review' else '' }}>Needs review</option><option value="legitimate" {{ 'selected' if classification == 'legitimate' else '' }}>Low risk</option></select></label>
+    <label class="filter-select"><span class="visually-hidden">Sort order</span><select name="sort"><option value="newest" {{ 'selected' if sort == 'newest' else '' }}>Newest first</option><option value="oldest" {{ 'selected' if sort == 'oldest' else '' }}>Oldest first</option></select></label>
+    <button class="button button-secondary filter-submit" type="submit">Apply filters</button>
+  </form>
+  {% if scans %}
+  <div class="table-wrap"><table><thead><tr><th>URL / hostname</th><th>Result</th><th>Score</th><th>Model signal</th><th>Scanned (UTC)</th><th></th></tr></thead><tbody>
+  {% for scan in scans %}<tr><td><span class="url-cell">{{ scan.url }}</span><span class="host-cell">{{ scan.hostname }}</span></td><td><span class="classification-badge badge-{{ scan.classification }}"><i></i>{{ scan.label }}</span></td><td><span class="score-cell">{{ '%.1f'|format(scan.risk_score) }}<small> / 100</small></span></td><td>{% if scan.model_used %}<span class="model-pill model-pill-on">Class 1 · {{ '%.1f'|format(scan.class1_score) }}%</span>{% else %}<span class="model-pill model-pill-off">Heuristics</span>{% endif %}</td><td class="date-cell">{{ scan.created_at|replace('T', ' ')|replace('+00:00', '') }}</td><td><a class="row-action" href="{{ url_for('scan_detail', scan_id=scan.id) }}" aria-label="Details for scan {{ scan.id }}"><svg><use href="#icon-arrow"></use></svg></a></td></tr>{% endfor %}
+  </tbody></table></div>
+  <div class="table-foot"><span>Showing {{ scans|length }}{{ ' (limit 250)' if scans|length == 250 else '' }} saved scans</span><span>History omits URL query strings and fragments.</span></div>
+  {% else %}<div class="empty-state"><span class="empty-symbol"><svg><use href="#icon-clock"></use></svg></span><h2>{{ 'No matching scans' if search or classification else 'No scans saved yet' }}</h2><p>{{ 'Try a different search or filter.' if search or classification else 'Run a URL analysis and its result will be recorded here.' }}</p>{% if search or classification %}<a class="button button-secondary" href="{{ url_for('history') }}">Clear filters</a>{% else %}<a class="button button-primary" href="{{ url_for('scan_url') }}">Open URL scanner</a>{% endif %}</div>{% endif %}
+</section>
+{% endblock %}
